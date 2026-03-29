@@ -181,5 +181,150 @@ namespace Lab8.Purple
             }
 
         }
+
+
+
+        public class Report
+        {
+            private Research[] _researches;
+            private static int _number; 
+
+            public Research[] Researches
+            {
+                get
+                {
+                    if (_researches == null)
+                    {
+                        return new Research[0];
+                    }
+                    return _researches;
+                }
+            }
+            private int Number => _number;
+
+
+
+            static Report()
+            {
+                _number = 1;
+            }
+
+            public Report()
+            {
+                _researches = new Research[0];
+            }
+
+
+            public Research MakeResearch()
+            {
+
+                DateTime now = DateTime.Now;
+                int X = _number;
+                string MM = now.ToString("MM");
+                string YY = now.ToString("YY");
+
+                Research res = new Research($"No_{X}_{MM}/{YY}");
+                Array.Resize(ref _researches, _researches.Length + 1);
+                _researches[^1] = res;
+
+                _number++;
+                return res;
+            }
+
+
+            public (string, double)[] GetGeneralReport(int question)
+            {
+                if (question < 1 || question > 3 || _researches == null || _researches.Length == 0)
+                {
+                    return new (string, double)[0];
+                }
+                string[] allAnswers = new string[0];
+                string answer;
+                string[] unicAnswer = new string[0];
+                bool isUnic;
+                int[] cntAnswers;
+                (string, double)[] res;
+                
+                for (int i = 0; i < _researches.Length; i++)
+                {
+                    if (_researches[i].Responses == null || _researches[i].Responses.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    for (int j = 0; j < _researches[i].Responses.Length; j++)
+                    {
+                        isUnic = true;
+                        switch (question)
+                        {
+                            case 1:
+                                answer = _researches[i].Responses[j].Animal;
+                                break;
+                            case 2:
+                                answer = _researches[i].Responses[j].CharacterTrait;
+                                break;
+                            case 3:
+                                answer = _researches[i].Responses[j].Concept;
+                                break;
+                            default:
+                                answer = "";
+                                break;
+                        }
+
+                        if (answer == null || answer == "")
+                        {
+                            continue;
+                        }
+                        if (unicAnswer.Length > 0)
+                        {
+                            for (int k = 0; k < unicAnswer.Length; k++)
+                            {
+                                
+                                if (unicAnswer[k] == answer)
+                                {
+                                    isUnic = false;
+                                }
+                            }
+                        }
+                        Array.Resize(ref allAnswers, allAnswers.Length + 1);
+                        allAnswers[^1] = answer;
+                        if (isUnic)
+                        {
+                            Array.Resize(ref unicAnswer, unicAnswer.Length + 1);
+                            unicAnswer[^1] = answer;
+                        }
+                    }
+                }
+
+                if(allAnswers.Length == 0)
+                {
+                    return new(string, double)[0];
+                }
+                
+                cntAnswers = new int[unicAnswer.Length];
+                res = new (string, double)[unicAnswer.Length];
+
+                for(int i = 0; i < unicAnswer.Length; i++)
+                {
+                    for(int j = 0; j < allAnswers.Length; j++)
+                    {
+                        if (allAnswers[j] == unicAnswer[i])
+                        {
+                            cntAnswers[i]++;
+                        }
+                    }
+                }
+
+                for(int i = 0; i < unicAnswer.Length; i++)
+                {
+                    res[i] = (unicAnswer[i], cntAnswers[i] * 100.0 / allAnswers.Length);
+                }
+
+                return res;
+
+
+
+            }
+        }
     }
 }
